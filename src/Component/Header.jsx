@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
@@ -26,14 +26,12 @@ export default function Header() {
         setAnchorElNav(false);
     };
 
-  
-
-    // useEffect(() => {
-    //     const login = localStorage.getItem('token')
-    //     if (!login) {
-    //         return window.location = '/login'
-    //     }
-    // })
+    useEffect(() => {
+        const login = localStorage.getItem('token')
+        if (!login) {
+            return window.location = '/login'
+        }
+    })
 
     return (
         <div>

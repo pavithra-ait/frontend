@@ -27,54 +27,62 @@ export default class Product extends Component {
         this.state = {
             Product_Title: '',
             Product_Price: 0,
-            image: '',
+            image: null,
             view: [],
             open: false
         }
     }
 
-    handleOpen = () => this.setState(true);
-    handleClose = () => this.setState(false);
+    handleOpen = () => this.setState({ open: true });
+    handleClose = () => this.setState({ open: false });
 
-    onChange(e) {
-        this.setState({
-            [e.target.name]: e.target.value
-        })
-    }
-    onChanges(e) {
-        this.setState({
-            [e.target.name]: e.target.files[0]
-        })
+    handleTitleChange = (event) => {
+        this.setState({ Product_Title: event.target.value });
     }
 
-    // componentDidUpdate(){
-    //     axios.get('http://localhost:5000/product/find')
-    //         .then(res => { return this.setState(res.data) })
-    //         .catch((err) => {
-    //             console.log(err)
-    //         })
-    // };
+    handlePriceChange = (event) => {
+        this.setState({ Product_Price: event.target.value });
+    }
 
-    render() {
-        const formdata = new FormData()
-        formdata.append('Product_Title', this.state.Product_Title)
-        formdata.append('Product_Price', this.state.Product_Price)
-        formdata.append('image', this.state.image)
-
-        function Submit() {
-            const config = {
-                headers: {
-                    'content-type': 'multipart/form-data',
-                },
-            };
-
-            axios.post('http://localhost:5000/product/create', formdata, config)
-                .then(() => {
-                    alert("data is sussfully addded")
-                    this.handleClose()
-                })
-                .catch(err => { console.log(err) })
+    handleImageChange = (event) => {
+        this.setState({ image: event.target.files[0] });
+    }
+    async componentDidMount() {
+        try {
+            const res = await axios.get('http://localhost:5000/product/find');
+            this.setState({ view: res.data });
+        } catch (err) {
+            console.log("Error fetching products:", err);
         }
+    }
+    handleSubmit = () => {
+        const formdata = new FormData();
+        formdata.append('Product_Title', this.state.Product_Title);
+        formdata.append('Product_Price', this.state.Product_Price);
+        formdata.append('image', this.state.image);
+
+        const config = {
+            headers: {
+                'content-type': 'multipart/form-data',
+            },
+        };
+
+        axios.post('http://localhost:5000/product/create', formdata, config)
+            .then(() => {
+                alert("Data is successfully added");
+                this.handleClose(); // Close the form/modal
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+    };
+    render() {
+        const user = Array.isArray(this.state.view) ? this.state.view : [];
+
+
+
+
+
         return (
             <div>
                 <Button sx={{ margin: 2 }} onClick={this.handleOpen} color='secondary' variant='contained'>Add product</Button>
@@ -90,17 +98,17 @@ export default class Product extends Component {
 
                             <Grid container rowGap={2} columnGap={2}>
                                 <Grid xs={5}>
-                                    <TextField type='text' color='secondary' name={this.state.Product_Title} onChange={this.onChange} label="Product_name" variant="filled" />
+                                    <TextField type='text' color='secondary' value={this.state.Product_Title} onChange={this.handleTitleChange} label="Product_name" variant="filled" />
                                 </Grid>
                                 <Grid xs={5}>
-                                    <TextField type='number' name={this.state.Product_Price} onChange={this.onChange} color='secondary' label="Price" variant="filled" />
+                                    <TextField type='number' value={this.state.Product_Price} onChange={this.handlePriceChange} color='secondary' label="Price" variant="filled" />
                                 </Grid>
                                 <Grid xs={11}>
-                                    <TextField type='file' color='secondary' name={this.state.image} onChange={this.onChanges} variant="filled" />
+                                    <TextField type='file' color='secondary' onChange={this.handleImageChange} variant="filled" />
                                 </Grid>
                                 <Grid xs={10} sx={{ textAlign: 'center', margin: 2 }}>
 
-                                    <Button color='secondary' variant='contained' onClick={Submit}>Send</Button>
+                                    <Button color='secondary' variant='contained' onClick={this.handleSubmit}>Send</Button>
                                 </Grid>
                             </Grid>
                         </Box>
@@ -120,7 +128,7 @@ export default class Product extends Component {
                             </TableHead>
                             <TableBody>
                                 {
-                                    this.state.view.map((item, index) => {
+                                    user.map((item, index) => {
                                         return (
                                             <TableRow
                                                 key={index}
@@ -140,6 +148,7 @@ export default class Product extends Component {
                                                         axios.delete(`http://localhost:5000/product/remove/${item._id}`)
                                                             .then(() => {
                                                                 alert("data is successfully deleted")
+                                                                window.location.reload()
                                                             })
                                                             .catch((err) => {
                                                                 console.log(err)

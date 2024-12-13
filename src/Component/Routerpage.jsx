@@ -11,11 +11,12 @@ export default function Routerpage() {
         <div>
             <BrowserRouter>
                 <Routes>
-                    <Route path='/' element={<Header/>}></Route>
-                    <Route path='/login' element={<Login/>}></Route>
-                    <Route path='/register' element={<Register/>}></Route>
-                    <Route path='/product' element={<Product/>}></Route>
-                    <Route path='/edit/:id' element={<Update/>}></Route>
+                    <Route path='/' element={<Header />}>
+                        <Route path='/product' element={<Product />}></Route>
+                        <Route path='/edit/:id' element={<Update />}></Route>
+                    </Route>
+                    <Route path='/login' element={<Login />}></Route>
+                    <Route path='/register' element={<Register />}></Route>
                 </Routes>
             </BrowserRouter>
         </div>
