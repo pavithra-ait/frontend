@@ -1,169 +1,104 @@
 
-import { Box, Button, Container, Grid, Modal, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField } from '@mui/material'
-import axios from 'axios';
-import { Link } from 'react-router-dom';
+import React, { Component } from "react";
+import { TextField, Button, Typography, Box } from "@mui/material";
+import axios from "axios";
 
-import React, { Component } from 'react'
+class AddEditItem extends Component {
+  state = {
+    id: null,
+    Name: "",
+    Price: 0,
+    image: null,
+    isEditMode: false,
+  };
 
-const style = {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    width: 400,
-    bgcolor: 'background.paper',
-    border: '2px solid #000',
-    boxShadow: 24,
-    p: 4,
-    height: 250
-
-};
-
-export default class Product extends Component {
-
-
-    constructor() {
-        super()
-        this.state = {
-            Product_Title: '',
-            Product_Price: 0,
-            image: null,
-            view: [],
-            open: false
-        }
+  componentDidMount() {
+    const { pathname } = window.location;
+    const isEditMode = pathname.includes("edit");
+    if (isEditMode) {
+      const id = pathname.split("/").pop();
+      this.setState({ isEditMode, id }, this.fetchItem);
     }
+  }
 
-    handleOpen = () => this.setState({ open: true });
-    handleClose = () => this.setState({ open: false });
-
-    handleTitleChange = (event) => {
-        this.setState({ Product_Title: event.target.value });
+  fetchItem = async () => {
+    try {
+      const response = await axios.get(`http://localhost:5000/api/product/find/${this.state.id}`); // Replace with your API endpoint
+      const { Name, Price,imageUrl } = response.data;
+      this.setState({ Name, Price, image: imageUrl });
+    } catch (error) {
+      console.error("Error fetching item:", error);
     }
+  };
 
-    handlePriceChange = (event) => {
-        this.setState({ Product_Price: event.target.value });
+  handleChange = (e) => {
+    const { name, value, files } = e.target;
+    if (name === "image") {
+      this.setState({ image: files[0] });
+    } else {
+      this.setState({ [name]: value });
     }
+  };
 
-    handleImageChange = (event) => {
-        this.setState({ image: event.target.files[0] });
+  handleSubmit = async (e) => {
+    e.preventDefault();
+    const { id, Name, Price, image, isEditMode } = this.state;
+
+    const formData = new FormData();
+    formData.append("Name", Name);
+    formData.append("Price", Price);
+    formData.append("image", image);
+
+    try {
+      if (isEditMode) {
+        await axios.put(`http://localhost:5000/api/product/update/${id}`, formData); // Replace with your API endpoint
+      } else {
+        await axios.post("http://localhost:5000/api/product/create", formData); // Replace with your API endpoint
+      }
+      window.location.href = "/list";
+    } catch (error) {
+      console.error("Error submitting form:", error);
     }
-    async componentDidMount() {
-        try {
-            const res = await axios.get('http://localhost:5000/product/find');
-            this.setState({ view: res.data });
-        } catch (err) {
-            console.log("Error fetching products:", err);
-        }
-    }
-    handleSubmit = () => {
-        const formdata = new FormData();
-        formdata.append('Product_Title', this.state.Product_Title);
-        formdata.append('Product_Price', this.state.Product_Price);
-        formdata.append('image', this.state.image);
+  };
 
-        const config = {
-            headers: {
-                'content-type': 'multipart/form-data',
-            },
-        };
+  render() {
+    const { Name,Price,isEditMode } = this.state;
 
-        axios.post('http://localhost:5000/product/create', formdata, config)
-            .then(() => {
-                alert("Data is successfully added");
-                this.handleClose(); // Close the form/modal
-            })
-            .catch((err) => {
-                console.log(err);
-            });
-    };
-    render() {
-        const user = Array.isArray(this.state.view) ? this.state.view : [];
-
-
-
-
-
-        return (
-            <div>
-                <Button sx={{ margin: 2 }} onClick={this.handleOpen} color='secondary' variant='contained'>Add product</Button>
-                <Modal
-                    sx={{ height: 500 }}
-                    open={this.state.open}
-                    onClose={this.handleClose}
-                    aria-labelledby="modal-modal-title"
-                    aria-describedby="modal-modal-description"
-                >
-                    <Box sx={style}>
-                        <Box id="modal-modal-description" sx={{ margin: 4 }}>
-
-                            <Grid container rowGap={2} columnGap={2}>
-                                <Grid xs={5}>
-                                    <TextField type='text' color='secondary' value={this.state.Product_Title} onChange={this.handleTitleChange} label="Product_name" variant="filled" />
-                                </Grid>
-                                <Grid xs={5}>
-                                    <TextField type='number' value={this.state.Product_Price} onChange={this.handlePriceChange} color='secondary' label="Price" variant="filled" />
-                                </Grid>
-                                <Grid xs={11}>
-                                    <TextField type='file' color='secondary' onChange={this.handleImageChange} variant="filled" />
-                                </Grid>
-                                <Grid xs={10} sx={{ textAlign: 'center', margin: 2 }}>
-
-                                    <Button color='secondary' variant='contained' onClick={this.handleSubmit}>Send</Button>
-                                </Grid>
-                            </Grid>
-                        </Box>
-
-                    </Box>
-                </Modal>
-                <Container>
-                    <TableContainer component={Paper}>
-                        <Table sx={{ minWidth: 650 }} aria-label="simple table">
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell align="right">Product Img</TableCell>
-                                    <TableCell align="right">Product Title</TableCell>
-                                    <TableCell align="right">Product Price</TableCell>
-                                    <TableCell align="right">Action</TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {
-                                    user.map((item, index) => {
-                                        return (
-                                            <TableRow
-                                                key={index}
-                                                sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                                            >
-                                                <TableCell align="right">
-                                                    <img src={`http://localhost:5000/product/view/${item.Product_File_Name}`} alt="" height={100} width={100} />
-                                                </TableCell>
-                                                <TableCell component="th" scope="row">
-                                                    {item.Product_Title}
-                                                </TableCell>
-                                                <TableCell align="right">{item.Product_Price}</TableCell>
-                                                <TableCell align="right">
-                                                    <Link to={`/edit/${item._id}`}>edit </Link>
-
-                                                    <Button sx={{ margin: 2 }} color='error' variant='contained' onClick={() => {
-                                                        axios.delete(`http://localhost:5000/product/remove/${item._id}`)
-                                                            .then(() => {
-                                                                alert("data is successfully deleted")
-                                                                window.location.reload()
-                                                            })
-                                                            .catch((err) => {
-                                                                console.log(err)
-                                                            })
-                                                    }}>Delete</Button>
-                                                </TableCell>
-                                            </TableRow>
-                                        )
-                                    })}
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
-                </Container>
-
-            </div>
-        )
-    }
+    return (
+      <Box maxWidth="400px" mx="auto" mt={5}>
+        <Typography variant="h4" mb={3}>
+          {isEditMode ? "Edit Item" : "Add Item"}
+        </Typography>
+        <Box >
+          <TextField
+            fullWidth
+            label="Name"
+            name="Name"
+            value={Name}
+            onChange={this.handleChange}
+            margin="normal"
+            required
+          />
+          <TextField
+            fullWidth
+            label="price"
+            name="Price"
+            value={Price}
+            onChange={this.handleChange}
+            margin="normal"
+            required
+          />
+          <Button variant="outlined" component="label" fullWidth sx={{ mt: 2 }}>
+            Upload Image
+            <input type="file" name="image"  onChange={this.handleChange} />
+          </Button>
+          <Button type="submit" onClick={this.handleSubmit} variant="contained" fullWidth sx={{ mt: 3 }}>
+            {isEditMode ? "Update Item" : "Add Item"}
+          </Button>
+        </Box>
+      </Box>
+    );
+  }
 }
+
+export default AddEditItem;

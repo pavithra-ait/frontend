@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
@@ -12,6 +11,7 @@ import Button from '@mui/material/Button';
 import MenuItem from '@mui/material/MenuItem';
 import AdbIcon from '@mui/icons-material/Adb';
 import { Link, Outlet } from 'react-router-dom';
+import Search from './Search';
 
 
 
@@ -21,17 +21,24 @@ export default function Header() {
     const handleOpenNavMenu = () => {
         setAnchorElNav(true);
     };
-  
+
     const handleCloseNavMenu = () => {
         setAnchorElNav(false);
     };
+    const logout = () => {
+        localStorage.removeItem('token')
+        // setlogout(data)
+        window.location.reload()
+    }
 
     useEffect(() => {
         const login = localStorage.getItem('token')
         if (!login) {
-            return window.location = '/login'
+            window.location = '/login'
         }
     })
+
+
 
     return (
         <div>
@@ -86,7 +93,11 @@ export default function Header() {
                             >
 
                                 <MenuItem onClick={handleCloseNavMenu}>
-                                    <Link to={'/product'}> Add Product </Link>
+                                    <Link to={'/product'} style={{ textDecoration: 'none' }}>Add Product </Link>
+                                </MenuItem>
+                                
+                                <MenuItem onClick={handleCloseNavMenu}>
+                                    <Link to={'/list'} style={{ textDecoration: 'none' }}>Product List </Link>
                                 </MenuItem>
                             </Menu>
                         </Box>
@@ -114,12 +125,12 @@ export default function Header() {
                                 <Button
                                     sx={{ my: 2, color: 'white', display: 'block' }}
                                 >
-                                    Add Product
+                                    Product
                                 </Button></Link>
                         </Box>
                         <Box sx={{ flexGrow: 0 }}>
                             <Typography sx={{ textAlign: 'right' }}>
-                                <Button sx={{ my: 1, color: 'white', display: 'block' }}>
+                                <Button sx={{ my: 1, color: 'white', display: 'block' }} onClick={logout}>
                                     Logout
                                 </Button>
                             </Typography>
@@ -127,6 +138,7 @@ export default function Header() {
                     </Toolbar>
                 </Container>
             </AppBar>
+            <Search />
             <Box>
                 <Outlet />
             </Box>

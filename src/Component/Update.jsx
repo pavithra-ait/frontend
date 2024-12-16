@@ -8,9 +8,6 @@ export default function Update() {
     const [price, setprice] = useState(0)
     const [file, setfile] = useState(null)
 
-
-
-
     const {id} = useParams()
 
     useEffect(() => {
@@ -32,10 +29,9 @@ export default function Update() {
 
     function Submit() {
 
-
         const config = {
             headers: {
-                'content-type': 'multipart/form-data',
+                'Ccontent-Type': 'multipart/form-data',
             },
         };
 
