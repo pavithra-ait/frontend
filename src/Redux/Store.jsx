@@ -1,7 +1,8 @@
 import { configureStore } from "@reduxjs/toolkit";
+import ProductSilce from  './Crudslice';
 
 export default configureStore({
     reducer:{
-        crud:4
+        Product:ProductSilce
     }
 })

@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -8,92 +8,101 @@ import {
   TableRow,
   Paper,
   Button,
-  Typography,
   Box,
+  TextField,
 } from "@mui/material";
 import { Link } from "react-router-dom";
-import axios from "axios";
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
+import Select from '@mui/material/Select';
+import { useDispatch, useSelector } from "react-redux";
+import { deleteitem, getitem } from "../Redux/Crudslice";
 
-class ItemTable extends Component {
-  state = {
-    items: [],
+function ItemTable() {
+
+  const selector = useSelector(state => state.Product.value)
+
+  const dispatch = useDispatch()
+
+  useEffect(() => {
+    dispatch(getitem())
+  },[dispatch])
+
+
+  function deleteItem(id) {
+    dispatch(deleteitem(id))
+    window.location.reload()
   };
 
-  componentDidMount() {
-    this.fetchItems();
-  }
+  return (
+    <Box sx={{ display: { sm: 'flex' }, flexDirection: 'column', width: '100%', height: '100%', justifyContent: 'center', alignItems: 'center' }} >
+      <Box sx={{ display: { sm: 'flex' }, flexDirection: 'column', width: '700px', margin: 5 }} >
+        <Box  >
+          <FormControl sx={{ m: 1, minWidth: 140 }}>
+            <TextField></TextField>
+          </FormControl>
+          <FormControl sx={{ m: 1, minWidth: 140 }}>
+            <InputLabel id="demo-simple-select-helper-label">Filter</InputLabel>
+            <Select
+              labelId="demo-simple-select-helper-label"
+              id="demo-simple-select-helper"
+              label="Filter"
 
-  fetchItems = async () => {
-    try {
-      const response = await axios.get("http://localhost:5000/api/product/find"); // Replace with your API endpoint
-      this.setState({ items: response.data });
-    } catch (error) {
-      console.error("Error fetching items:", error);
-    }
-  };
-
-  deleteItem = async (id) => {
-    try {
-      await axios.delete(`http://localhost:5000/api/product/remove/${id}`); // Replace with your API endpoint
-      this.fetchItems();
-    } catch (error) {
-      console.error("Error deleting item:", error);
-    }
-  };
-
-  render() {
-    const { items } = this.state;
-
-    return (
-      <Box>
-        <Typography variant="h4" mb={3}>
-          Items List
-        </Typography>
-        <Link to="/product">
-          <Button variant="contained" sx={{ mb: 2 }}>
-            Add New Item
-          </Button>
-        </Link>
-        <TableContainer component={Paper}>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>Image</TableCell>
-                <TableCell>Name</TableCell>
-                <TableCell>Price</TableCell>
-                <TableCell>Actions</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {items.map((item) => (
-                <TableRow key={item.id}>
-                  <TableCell>
-                    <img src={item.imageUrl} alt={item.Name} width="100" />
-                  </TableCell>
-                  <TableCell>{item.Name}</TableCell>
-                  <TableCell>{item.Price}</TableCell>
-                  <TableCell>
-                    <Link to={`/edit/${item.id}`}>
-                      <Button variant="outlined" sx={{ mr: 1 }}>
-                        Edit
-                      </Button>
-                    </Link>
-                    <Button
-                      variant="outlined"
-                      color="error"
-                      onClick={() => this.deleteItem(item.id)}
-                    >
-                      Delete
-                    </Button>
-                  </TableCell>
+            >
+              <MenuItem value={'Name'}>Name</MenuItem>
+            </Select>
+          </FormControl>
+        </Box>
+        <Box>
+          <Link to="/product">
+            <Button variant="contained" sx={{ mb: 2 }}>
+              Add New Item
+            </Button>
+          </Link>
+          <TableContainer sx={{ width: '600px' }} component={Paper}>
+            <Table>
+              <TableHead sx={{ bgcolor: '#1565c0' }}>
+                <TableRow>
+                  <TableCell>Image</TableCell>
+                  <TableCell>Name</TableCell>
+                  <TableCell>Price</TableCell>
+                  <TableCell>Actions</TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+              </TableHead>
+              <TableBody>
+                {
+                selector.map((item) => (
+                    <TableRow key={item._id}>
+                      <TableCell>
+                        <img src={`http://localhost:5000/view/${item.File_name}`} alt={item.Name} width="100" />
+                      </TableCell>
+                      <TableCell>{item.Name}</TableCell>
+                      <TableCell>{item.Price}</TableCell>
+                      <TableCell>
+                        <Link to={`/edit/${item._id}`}>
+                          <Button variant="outlined" sx={{ mr: 1 }}>
+                            Edit
+                          </Button>
+                        </Link>
+                        <Button
+                          variant="outlined"
+                          color="error"
+                          onClick={() => deleteItem(item._id)}
+                        >
+                          Delete
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Box>
       </Box>
-    );
-  }
+    </Box>
+  );
 }
+
 
 export default ItemTable;

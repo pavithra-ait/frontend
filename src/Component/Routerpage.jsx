@@ -1,5 +1,5 @@
 import React from 'react'
-import { Route, Routes } from 'react-router-dom'
+import { Navigate, Route, Routes } from 'react-router-dom'
 import Login from './Login'
 import Product from './Product'
 import Register from './Register'
@@ -11,6 +11,7 @@ export default function Routerpage() {
     return (
         <div>
             <Routes>
+                <Route path='/' element={<Navigate to='/list'/>}></Route>
                 <Route path='/' element={<Header />}>
                     <Route path='/product' element={<Product />}></Route>
                     <Route path='/list' element={<ItemTable />}></Route>

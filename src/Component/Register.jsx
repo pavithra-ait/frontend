@@ -19,8 +19,7 @@ class Register extends Component {
     this.setState({ [e.target.name]: e.target.value });
   };
 
-  handleSubmit = async (e) => {
-    e.preventDefault();
+  handleSubmit = async () => {
     try {
       const { name, email, password } = this.state;
       await axios.post("http://localhost:5000/api/auth/register", { name, email, password });
@@ -32,50 +31,56 @@ class Register extends Component {
   };
 
   render() {
-    const { name, email, password , success, error } = this.state;
+    const { name, email, password, success, error } = this.state;
 
     return (
-      <Box maxWidth="400px" mx="auto" mt={5}>
-        <Typography variant="h4" mb={3}>
-          Register
-        </Typography>
-        {success && <Alert severity="success">Registration successful!</Alert>}
-        {error && <Alert severity="error">{error}</Alert>}
-        <Box >
-          <TextField
-            fullWidth
-            label="Name:"
-            type="text"
-            name="name"
-            value={name}
-            onChange={this.handleChange}
-            margin="normal"
-            required
-          />
-          <TextField
-            fullWidth
-            label="Email"
-            name="email"
-            value={email}
-            onChange={this.handleChange}
-            margin="normal"
-            required
-          />
-          <TextField
-            fullWidth
-            label="Password"
-            name="password"
-            type="password"
-            value={password}
-            onChange={this.handleChange}
-            margin="normal"
-            required
-          />
-          <Button fullWidth type="submit" onClick={this.handleSubmit} variant="contained" sx={{ mt: 2 }}>
+      <Box sx={{ display: { xs: 'flex' }, justifyContent: 'center', alignItems: 'center', height: '500px' }}>
+        <Box sx={{ width: '400px', textAlign: 'center', bgcolor: '#1565c0', padding: 2, borderRadius: 5 }} boxShadow={5} >
+          <Typography variant="h4" mb={3} color='secondary'>
             Register
-          </Button>
+          </Typography>
+          {success && <Alert severity="success">Registration successful!</Alert>}
+          {error && <Alert severity="error">{error}</Alert>}
+          <Box sx={{margin:3}} >
+            <TextField
+              fullWidth
+              label="Name:"
+              type="text"
+              name="name"
+              value={name}
+              onChange={this.handleChange}
+              margin="normal"
+              color='secondary'
+        
+            />
+            <TextField
+              fullWidth
+              label="Email"
+              name="email"
+              value={email}
+              onChange={this.handleChange}
+              margin="normal"
+              color='secondary'
+              
+
+            />
+            <TextField
+              fullWidth
+              label="Password"
+              name="password"
+              type="password"
+              value={password}
+              onChange={this.handleChange}
+              margin="normal"
+              color='secondary'
+            
+            />
+            <Button fullWidth type="submit" onClick={this.handleSubmit} variant="contained" color='secondary' sx={{ mt: 2 }}>
+              Register
+            </Button>
+          </Box>
         </Box>
-      </Box>
+      </Box >
     );
   }
 }

@@ -33,7 +33,7 @@ class Login extends Component {
         localStorage.setItem('token', res.data.token)
         window.location = '/'
       })
-      .catch(err=>{console.log(err);})
+        .catch(err => { console.log(err); })
 
       // Navigate to another page
     } catch (error) {
@@ -52,32 +52,37 @@ class Login extends Component {
     const { name, password, error } = this.state;
 
     return (
-      <Box>
-        <Typography variant="h4">Login</Typography>
-        {error && <Alert severity="error">{error}</Alert>}
-        <Box>
-          <TextField
-            label="Name"
-            name="name"
-            value={name}
-            onChange={this.handleChange}
-            fullWidth
-            margin="normal"
-          />
-          <TextField
-            label="Password"
-            name="password"
-            type="password"
-            value={password}
-            onChange={this.handleInputChange}
-            fullWidth
-            margin="normal"
-          />
-          <Button type="submit" onClick={this.handleSubmit} variant="contained" color="primary">
-            Login
-          </Button>
-        </Box>
+      <Box sx={{ display: { xs: 'flex' }, justifyContent: 'center', alignItems: 'center', height: '500px' }}>
+        <Box sx={{ width: '400px', textAlign: 'center', bgcolor:'#1565c0', padding: 2, borderRadius: 5 }} boxShadow={5} >
+          <Typography variant="h4" color='secondary'>Login</Typography>
+          {error && <Alert severity="error">{error}</Alert>}
+          <Box sx={{ margin: 3 }}>
+            <TextField info
+              label="Name"
+              name="name"
+              value={name}
+              onChange={this.handleChange}
+              fullWidth
+              margin="normal"
+              color="secondary" focused
+            />
+            <TextField
 
+              label="Password"
+              name="password"
+              type="password"
+              value={password}
+              onChange={this.handleInputChange}
+              fullWidth
+              margin="normal"
+              color="secondary"
+              focused
+            />
+            <Button type="submit" onClick={this.handleSubmit} variant="contained" color="secondary">
+              Login
+            </Button>
+          </Box>
+        </Box>
       </Box>
     );
   }

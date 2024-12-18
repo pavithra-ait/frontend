@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import ItemTable from "../components/ItemTable";
+import ItemTable from "../Component/ItemTable";
 import { expect, test } from '@jest/globals';
 import React from "react";
 

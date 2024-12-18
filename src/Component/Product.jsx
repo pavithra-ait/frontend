@@ -1,104 +1,83 @@
 
-import React, { Component } from "react";
+import React, { useState } from "react";
 import { TextField, Button, Typography, Box } from "@mui/material";
-import axios from "axios";
 
-class AddEditItem extends Component {
-  state = {
-    id: null,
-    Name: "",
-    Price: 0,
-    image: null,
-    isEditMode: false,
-  };
+import { useDispatch } from "react-redux";
+import { postitem } from "../Redux/Crudslice";
 
-  componentDidMount() {
-    const { pathname } = window.location;
-    const isEditMode = pathname.includes("edit");
-    if (isEditMode) {
-      const id = pathname.split("/").pop();
-      this.setState({ isEditMode, id }, this.fetchItem);
-    }
-  }
+function Product() {
 
-  fetchItem = async () => {
-    try {
-      const response = await axios.get(`http://localhost:5000/api/product/find/${this.state.id}`); // Replace with your API endpoint
-      const { Name, Price,imageUrl } = response.data;
-      this.setState({ Name, Price, image: imageUrl });
-    } catch (error) {
-      console.error("Error fetching item:", error);
-    }
-  };
+  const dispatch = useDispatch()
 
-  handleChange = (e) => {
-    const { name, value, files } = e.target;
-    if (name === "image") {
-      this.setState({ image: files[0] });
-    } else {
-      this.setState({ [name]: value });
-    }
-  };
+  const [name, setName] = useState('')
+  const [price, setPrice] = useState(0)
+  const [image, setImage] = useState(null)
 
-  handleSubmit = async (e) => {
-    e.preventDefault();
-    const { id, Name, Price, image, isEditMode } = this.state;
+  async function handleSubmit() {
 
-    const formData = new FormData();
-    formData.append("Name", Name);
-    formData.append("Price", Price);
-    formData.append("image", image);
+    const formData = { Name: name, Price: price, image }
 
     try {
-      if (isEditMode) {
-        await axios.put(`http://localhost:5000/api/product/update/${id}`, formData); // Replace with your API endpoint
-      } else {
-        await axios.post("http://localhost:5000/api/product/create", formData); // Replace with your API endpoint
-      }
-      window.location.href = "/list";
+      dispatch(postitem(formData))
+        .unwrap()
+        .then(() => {
+          alert("success")
+          window.location = "/list";
+
+        })
+        .catch(err => console.log(err))
     } catch (error) {
       console.error("Error submitting form:", error);
     }
   };
 
-  render() {
-    const { Name,Price,isEditMode } = this.state;
+  return (
+    <Box sx={{ display: { sm: 'flex' }, height: '100%', justifyContent: 'center', alignItems: 'center' }}>
 
-    return (
-      <Box maxWidth="400px" mx="auto" mt={5}>
-        <Typography variant="h4" mb={3}>
-          {isEditMode ? "Edit Item" : "Add Item"}
+      <Box maxWidth="400px" mx="auto" sx={{ width: '400px', textAlign: 'center', bgcolor: '#1565c0', padding: 2, borderRadius: 5 }} boxShadow={5} mt={5}>
+        <Typography variant="h4" color="error" mb={3}>
+          Add Product
         </Typography>
-        <Box >
+        <Box sx={{ margin: 3 }} >
           <TextField
             fullWidth
             label="Name"
             name="Name"
-            value={Name}
-            onChange={this.handleChange}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
             margin="normal"
             required
+            color='error'
+            focused
           />
           <TextField
             fullWidth
             label="price"
             name="Price"
-            value={Price}
-            onChange={this.handleChange}
+            value={price}
+            onChange={(e) => setPrice(e.target.value)}
             margin="normal"
+            color='error'
+            focused
             required
           />
-          <Button variant="outlined" component="label" fullWidth sx={{ mt: 2 }}>
-            Upload Image
-            <input type="file" name="image"  onChange={this.handleChange} />
-          </Button>
-          <Button type="submit" onClick={this.handleSubmit} variant="contained" fullWidth sx={{ mt: 3 }}>
-            {isEditMode ? "Update Item" : "Add Item"}
+          <TextField fullWidth
+            type="file"
+            name="image"
+            margin="normal"
+            color='error'
+            onChange={(e) => setImage(e.target.files[0])}
+            focused
+            required >
+          </TextField>
+          <Button type="submit" onClick={handleSubmit} variant="contained" fullWidth sx={{ mt: 4, bgcolor: '#ff1744' }}>
+            Add Item
           </Button>
         </Box>
       </Box>
-    );
-  }
+    </Box>
+  );
 }
 
-export default AddEditItem;
+
+export default Product;
