@@ -10,16 +10,17 @@ function Product() {
   const dispatch = useDispatch()
 
   const [name, setName] = useState('')
-  const [price, setPrice] = useState(0)
+  const [price, setPrice] = useState('')
+  const [date, setDate] = useState('')
+  const [stock, setStock] = useState('')
   const [image, setImage] = useState(null)
 
   async function handleSubmit() {
 
-    const formData = { Name: name, Price: price, image }
+    const formData = { Name: name, Price: price, image,Dates:date,Stock:stock }
 
     try {
       dispatch(postitem(formData))
-        .unwrap()
         .then(() => {
           alert("success")
           window.location = "/list";
@@ -43,6 +44,8 @@ function Product() {
             fullWidth
             label="Name"
             name="Name"
+            type="text"
+
             value={name}
             onChange={(e) => setName(e.target.value)}
             margin="normal"
@@ -54,6 +57,7 @@ function Product() {
             fullWidth
             label="price"
             name="Price"
+            type="text"
             value={price}
             onChange={(e) => setPrice(e.target.value)}
             margin="normal"
@@ -70,6 +74,30 @@ function Product() {
             focused
             required >
           </TextField>
+          <TextField
+            fullWidth
+            label="Date"
+            name="Date"
+            type="date"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+            margin="normal"
+            color='error'
+            focused
+            required
+          />
+          <TextField
+            fullWidth
+            label="Stock"
+            name="Stock"
+            type="text"
+            value={stock}
+            onChange={(e) => setStock(e.target.value)}
+            margin="normal"
+            color='error'
+            focused
+            required
+          />
           <Button type="submit" onClick={handleSubmit} variant="contained" fullWidth sx={{ mt: 4, bgcolor: '#ff1744' }}>
             Add Item
           </Button>

@@ -1,107 +1,100 @@
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { createAsyncThunk} from "@reduxjs/toolkit";
 import axios from "axios";
 
 const api = 'http://localhost:5000/api/product';
 
-export const getitem = createAsyncThunk('product/fetchitem', async () => {
-  const response = await axios.get(`${api}/find`, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    }
-  })
-  return response.data
-})
 
-export const postitem = createAsyncThunk('product/createitem', async (productData) => {
-  const formData = new FormData();
-  formData.append('image', productData.image);
-  formData.append('Name', productData.Name);
-  formData.append('Price', productData.Price);
-
-  const response = await axios.post(`${api}/create`, formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
-  });
-
-  return response.data;
-})
-
-export const getitembyid = createAsyncThunk('product/fetchitembyid', async (id) => {
-  const response = await axios.get(`${api}/find/${id}`, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    }
-  })
-  return response.data
-})
-
-export const putitem = createAsyncThunk('product/updateitem', async (product,thunkAPI) => {
+export const getitem = () => async (dispatch) => {
   try {
-    const response = await fetch(`/api/product/update/${product._id}`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(product), // Send the whole product object
+    const { data } = await axios.get(`${api}/find`);
+    dispatch({ type: 'FETCH_PRODUCTS', payload: data });
+  } catch (error) {
+    console.error('Error fetching products:', error);
+  }
+};
+
+export const getitembyid = (id) => async (dispatch) => {
+  try {
+    const { data } = await axios.get(`${api}/find/${id}`);
+    dispatch({ type: 'FETCH_PRODUCTS', payload: data });
+  } catch (error) {
+    console.error('Error fetching products:', error);
+  }
+};
+
+export const postitem = (productData) => async (dispatch) => {
+  try {
+    const { data } = await axios.post(`${api}/create`, productData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    dispatch({ type: 'ADD_PRODUCT', payload: data });
+  } catch (error) {
+    console.error('Error adding product:', error);
+  }
+};
+
+export const putitem = ( productData) => async (dispatch) => {
+  try {
+    const response = await axios.put(`${api}/update/${productData.id}`, productData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
     });
 
-    if (!response.ok) {
-        throw new Error('Failed to update product');
-    }
+    const data = await response.data;
+    dispatch({ type: 'UPDATE_PRODUCT', payload: data });
+  } catch (error) {
+    console.error('Error updating product:', error);
+  }
+};
 
-    return await response.json(); // Return the updated product data
-} catch (error) {
-    return thunkAPI.rejectWithValue(error.message);
-}
-})
+export const deleteProduct = (id) => async (dispatch) => {
+  try {
+    await axios.delete(`${api}/remove/${id}`);
+    dispatch({ type: 'DELETE_PRODUCT', payload: id });
+  } catch (error) {
+    console.error('Error deleting product:', error);
+  }
+};
 
 export const deleteitem = createAsyncThunk('product/removeitem', async (id) => {
   const response = await axios.delete(`${api}/remove/${id}`)
   return response.id;
 })
 
-const ProductSlice = createSlice({
-  name: 'Product',
-  initialState: {
-    value: [],
-    status: 'idle',
-    error: null
-  },
-  reducers: {},
-  extraReducers: (builder) => {
-    builder
-      .addCase(getitem.pending, (state) => {
-        state.status = 'loading'
-      })
-      .addCase(getitem.rejected, (state, action) => {
-        state.status = 'failed'
-        state.value = action.error.message
-      })
-      .addCase(getitem.fulfilled, (state, action) => {
-        state.status = 'success'
-        state.value = action.payload
-      })
-      .addCase(postitem.fulfilled, (state, action) => {
-        state.status = 'success'
-        state.value.push(action.payload);
-      })
-      .addCase(putitem.fulfilled, (state, action) => {
-        state.value = state.value.map(product => {
-            if (product && product.id === action.payload._id) {
-              
-                return { ...product, ...action.payload };
-            }
-            return product;  
-        });
-    })
-      .addCase(deleteitem.fulfilled, (state, action) => {
+const initialState = {
+  products: [],
+};
 
-        state.value = state.value.filter((item) => item._id !== action.payload)
-      })
+const productReducer = (state = initialState, action) => {
+  switch (action.type) {
+    case 'FETCH_PRODUCTS':
+      return {
+        ...state,
+        products: action.payload,
+      };
+    case 'ADD_PRODUCT':
+      return {
+        ...state,
+        products: [...state.products, action.payload],
+      };
+    case 'UPDATE_PRODUCT':
+      return {
+        ...state,
+        products: state.products.map((product) =>
+          product._id === action.payload.id ? action.payload : product
+        ),
+      };
+    case 'DELETE_PRODUCT':
+      return {
+        ...state,
+        products: state.products.filter((product) => product._id !== action.payload),
+      };
+    default:
+      return state;
   }
-})
+};
 
-
-export default ProductSlice.reducer
-
+export default productReducer;
